@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# The .vscode folder contains launch configuration and tasks configured
+.vscode
+
+# Log files
+*.log
+
+# Environments
+.env

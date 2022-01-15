@@ -1,6 +1,6 @@
 # bot para fazer carga do solar
 
-Este projeto usa o poetry como geneciador de dependências
+Este projeto usa o poetry como gerenciador de dependências
 
 ## Para instalar as dependências
 

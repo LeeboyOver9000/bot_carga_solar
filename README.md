@@ -10,8 +10,10 @@ Este projeto usa o poetry como geneciador de dependências
 
 Dentro da pasta app, deve-se criar um arquivo **.env** com as seguintes variáveis:
 
+```text
 USUARIO=
 SENHA=
+```
 
 ## Para rodar o bot
 

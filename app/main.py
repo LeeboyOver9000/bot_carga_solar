@@ -20,8 +20,8 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 dir_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(dir_path)
 
-# dia_da_carga = datetime(day=10, month=12, year=2021)
-dia_da_carga = datetime.now() - timedelta(days=1)
+# dia_da_carga = datetime(day=27, month=5, year=2022)
+dia_da_carga = datetime.now() - timedelta(days=3)
 dia_da_carga_formatado = f'{datetime.strftime(dia_da_carga, "%d/%m/%Y")} 00:00'
 
 log_formart = '%(asctime)s - %(message)s'

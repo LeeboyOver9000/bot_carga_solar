@@ -26,17 +26,18 @@ dia_da_carga_formatado = f'{datetime.strftime(dia_da_carga, "%d/%m/%Y")} 00:00'
 
 log_formart = '%(asctime)s - %(message)s'
 
-logging.basicConfig(filename='output.log',
-                    filemode='w',
-                    level=logging.INFO,
-                    format=log_formart)
+logging.basicConfig(
+    filename='output.log', filemode='w', level=logging.INFO, format=log_formart
+)
 
 logger = logging.getLogger('root')
 
 
 def login(usuario: str, senha: str) -> WebDriver:
     """Faz o login para entrar no formulário de carga."""
-    url = f'http://{usuario}:{senha}@200.129.43.116/Solar2SI3/Batch/Batches.aspx'
+    url = (
+        f'http://{usuario}:{senha}@200.129.43.116/Solar2SI3/Batch/Batches.aspx'
+    )
 
     options = Options()
     options.add_argument('--headless')
@@ -83,10 +84,8 @@ def resultado_popup(mensagem: str, browser: WebDriver):
         logger.error(mensagem_formatada)
         print(mensagem_formatada)
     except TimeoutException:
-        logger.error(
-            f'Demorou mais de 1 hora pra fazer a {mensagem.lower()}.')
-        print(
-            f'Demorou mais de 1 hora pra fazer a {mensagem.lower()}.')
+        logger.error(f'Demorou mais de 1 hora pra fazer a {mensagem.lower()}.')
+        print(f'Demorou mais de 1 hora pra fazer a {mensagem.lower()}.')
 
     browser.switch_to.window(original_window)
 
@@ -98,8 +97,9 @@ def carga_disciplinas(browser: WebDriver):
     if checkbox.get_attribute('checked'):
         checkbox.click()
 
-    browser.find_element(By.ID,
-                         'txtAltTurmaDisc').send_keys(dia_da_carga_formatado)
+    browser.find_element(By.ID, 'txtAltTurmaDisc').send_keys(
+        dia_da_carga_formatado
+    )
     browser.find_element(By.ID, 'btDisciplinas').click()
 
     resultado_popup('Carga das Disciplinas', browser)
@@ -111,12 +111,12 @@ def carga_turmas(browser: WebDriver):
     """Realiza a carga das turmas usando o dia da carga."""
     wait = WebDriverWait(browser, timeout=30)
     checkbox = wait.until(
-        EC.element_to_be_clickable((By.ID, 'turma_distancia')))
+        EC.element_to_be_clickable((By.ID, 'turma_distancia'))
+    )
     if checkbox.get_attribute('checked'):
         checkbox.click()
 
-    browser.find_element(By.ID, 'txDtTurma').send_keys(
-        dia_da_carga_formatado)
+    browser.find_element(By.ID, 'txDtTurma').send_keys(dia_da_carga_formatado)
     browser.find_element(By.ID, 'btTurmas').click()
 
     resultado_popup('Carga das Turmas', browser)
@@ -127,20 +127,21 @@ def carga_turmas(browser: WebDriver):
 def carga_matriculas_presencial(browser: WebDriver):
     """Realiza a carga das turmas prenciais usando o dia da carga."""
     wait = WebDriverWait(browser, timeout=30)
-    checkbox = wait.until(
-        EC.element_to_be_clickable((By.ID, 'mat_distancia')))
+    checkbox = wait.until(EC.element_to_be_clickable((By.ID, 'mat_distancia')))
     if checkbox.get_attribute('checked'):
         checkbox.click()
 
     browser.find_element(By.ID, 'txtAltTurma').send_keys(
-        dia_da_carga_formatado)
+        dia_da_carga_formatado
+    )
     browser.find_element(By.ID, 'btMatriculas').click()
 
     resultado_popup('Carga das Matrículas - Alteração das Turmas', browser)
 
     browser.find_element(By.ID, 'txtAltTurma').clear()
-    browser.find_element(By.ID,
-                         'txDtMatricula').send_keys(dia_da_carga_formatado)
+    browser.find_element(By.ID, 'txDtMatricula').send_keys(
+        dia_da_carga_formatado
+    )
     browser.find_element(By.ID, 'btMatriculas').click()
 
     resultado_popup('Carga das Matrículas - Presenciais', browser)
@@ -171,8 +172,8 @@ def ler_resultado_log(arquivo_de_log: str) -> str:
 
 load_dotenv(find_dotenv())
 
-usuario = os.environ.get("USUARIO")
-senha = os.environ.get("SENHA")
+usuario = os.environ.get('USUARIO')
+senha = os.environ.get('SENHA')
 
 if __name__ == '__main__':
     browser: WebDriver = login(usuario, senha)

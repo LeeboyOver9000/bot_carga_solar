@@ -1,6 +1,6 @@
 # bot para fazer carga do solar
 
-Este projeto usa o poetry como gerenciador de dependências
+Este projeto usa o poetry para gerenciar as dependências
 
 ## Para instalar as dependências
 
@@ -13,6 +13,7 @@ Dentro da pasta app, deve-se criar um arquivo **.env** com as seguintes variáve
 ```text
 USUARIO=
 SENHA=
+SENHA_EMAIL=
 ```
 
 ## Para rodar o bot

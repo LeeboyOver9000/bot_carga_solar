@@ -1,5 +1,7 @@
 import os
 import logging
+import smtplib
+import email.message
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -53,7 +55,7 @@ def login(usuario: str, senha: str) -> WebDriver:
     return browser
 
 
-def resultado_popup(mensagem: str, browser: WebDriver):
+def resultado_popup(mensagem: str, browser: WebDriver) -> None:
     """Ler o conteúdo do popup, escreve o conteúdo em output.log e no console."""
     original_window = browser.current_window_handle
     mensagem_formatada = f'{mensagem} ({dia_da_carga_formatado})'
@@ -90,7 +92,7 @@ def resultado_popup(mensagem: str, browser: WebDriver):
     browser.switch_to.window(original_window)
 
 
-def carga_disciplinas(browser: WebDriver):
+def carga_disciplinas(browser: WebDriver) -> None:
     """Realiza a carga das disciplinas usando o dia da carga."""
     wait = WebDriverWait(browser, timeout=30)
     checkbox = wait.until(EC.element_to_be_clickable((By.ID, 'distancia')))
@@ -107,7 +109,7 @@ def carga_disciplinas(browser: WebDriver):
     browser.find_element(By.ID, 'txtAltTurmaDisc').clear()
 
 
-def carga_turmas(browser: WebDriver):
+def carga_turmas(browser: WebDriver) -> None:
     """Realiza a carga das turmas usando o dia da carga."""
     wait = WebDriverWait(browser, timeout=30)
     checkbox = wait.until(
@@ -124,7 +126,7 @@ def carga_turmas(browser: WebDriver):
     browser.find_element(By.ID, 'txDtTurma').clear()
 
 
-def carga_matriculas_presencial(browser: WebDriver):
+def carga_matriculas_presencial(browser: WebDriver) -> None:
     """Realiza a carga das turmas prenciais usando o dia da carga."""
     wait = WebDriverWait(browser, timeout=30)
     checkbox = wait.until(EC.element_to_be_clickable((By.ID, 'mat_distancia')))
@@ -150,7 +152,7 @@ def carga_matriculas_presencial(browser: WebDriver):
     browser.find_element(By.ID, 'txDtMatricula').clear()
 
 
-def carga_matriculas_distancia(browser: WebDriver):
+def carga_matriculas_distancia(browser: WebDriver) -> None:
     """Realiza a carga das turmas EAD sem passar dia pra carga."""
     wait = WebDriverWait(browser, timeout=30)
     checkbox = wait.until(EC.element_to_be_clickable((By.ID, 'mat_distancia')))
@@ -170,10 +172,30 @@ def ler_resultado_log(arquivo_de_log: str) -> str:
     return resultado
 
 
+def enviar_email(mensagem: str) -> None:
+    corpo_email = f"""
+    <p>{mensagem}</p>
+    """
+
+    msg = email.message.Message()
+    msg['Subject'] = f'Resultado da carga {dia_da_carga_formatado}'
+    msg['From'] = 'pedroaragao@virtual.ufc.br'
+    msg['To'] = 'pedroaragao@virtual.ufc.br'
+    password = senha_email
+    msg.add_header('Content-Type', 'text/html')
+    msg.set_payload(corpo_email)
+
+    s = smtplib.SMTP('smtp.gmail.com: 587')
+    s.starttls()
+    s.login(msg['From'], password)
+    s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
+
+
 load_dotenv(find_dotenv())
 
 usuario = os.environ.get('USUARIO')
 senha = os.environ.get('SENHA')
+senha_email = os.environ.get('SENHA_EMAIL')
 
 if __name__ == '__main__':
     browser: WebDriver = login(usuario, senha)
@@ -182,5 +204,9 @@ if __name__ == '__main__':
     carga_turmas(browser)
     carga_matriculas_presencial(browser)
     # carga_matriculas_distancia(browser)
+
+    if senha_email:
+        resultado_log = ler_resultado_log('output.log')
+        enviar_email(mensagem=resultado_log)
 
     browser.quit()

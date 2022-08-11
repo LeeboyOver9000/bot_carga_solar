@@ -57,12 +57,12 @@ def login(usuario: str, senha: str) -> WebDriver:
 
 def resultado_popup(mensagem: str, browser: WebDriver) -> None:
     """Ler o conteúdo do popup, escreve o conteúdo em output.log e no console."""
-    original_window = browser.current_window_handle
-    mensagem_formatada = f'{mensagem} ({dia_da_carga_formatado})'
+    mensagem_formatada = f'\n{mensagem} ({dia_da_carga_formatado})'
 
     try:
-        # Espera até 1 hora (3600 segundos) pelo resultado
-        wait = WebDriverWait(browser, timeout=3600)
+        original_window = browser.current_window_handle
+
+        wait = WebDriverWait(browser, timeout=3600)  # Espera até 1 hora
         wait.until(EC.number_of_windows_to_be(2))
 
         for window_handle in browser.window_handles:
@@ -81,15 +81,18 @@ def resultado_popup(mensagem: str, browser: WebDriver) -> None:
                     print(mensagem_formatada)
 
                 browser.close()
+
+        browser.switch_to.window(original_window)
     except NoSuchElementException as err:
         mensagem_formatada += f': {err}'
-        logger.error(mensagem_formatada)
-        print(mensagem_formatada)
+        # logger.error(mensagem_formatada)
+        # print(mensagem_formatada)
+        raise NoSuchElementException(mensagem_formatada)
     except TimeoutException:
-        logger.error(f'Demorou mais de 1 hora pra fazer a {mensagem.lower()}.')
-        print(f'Demorou mais de 1 hora pra fazer a {mensagem.lower()}.')
-
-    browser.switch_to.window(original_window)
+        mensagem_formatada = f'Demorou mais de 1 hora pra fazer a {mensagem.lower()}.'
+        # logger.error(mensagem_formatada)
+        # print(mensagem_formatada)
+        raise TimeoutException(mensagem_formatada)
 
 
 def carga_disciplinas(browser: WebDriver) -> None:
@@ -200,10 +203,14 @@ senha_email = os.environ.get('SENHA_EMAIL')
 if __name__ == '__main__':
     browser: WebDriver = login(usuario, senha)
 
-    carga_disciplinas(browser)
-    carga_turmas(browser)
-    carga_matriculas_presencial(browser)
-    # carga_matriculas_distancia(browser)
+    try:
+        carga_disciplinas(browser)
+        carga_turmas(browser)
+        carga_matriculas_presencial(browser)
+        carga_matriculas_distancia(browser)
+    except (NoSuchElementException, TimeoutException) as error:
+        logger.error(error)
+        # print(error)
 
     if senha_email:
         resultado_log = ler_resultado_log('output.log')

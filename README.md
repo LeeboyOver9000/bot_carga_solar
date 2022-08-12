@@ -14,6 +14,8 @@ Dentro da pasta app, deve-se criar um arquivo **.env** com as seguintes variáve
 USUARIO=
 SENHA=
 SENHA_EMAIL=
+REMETENTE=
+DESTINATARIOS=
 ```
 
 ## Para rodar o bot

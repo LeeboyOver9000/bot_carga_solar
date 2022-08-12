@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
@@ -18,12 +17,15 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
 
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from smtplib import SMTPException
+
+from rocketry import Rocketry
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(dir_path)
 
 # dia_da_carga = datetime(day=27, month=5, year=2022)
-dia_da_carga = datetime.now() - timedelta(days=3)
+dia_da_carga = datetime.now() - timedelta(days=1)
 dia_da_carga_formatado = f'{datetime.strftime(dia_da_carga, "%d/%m/%Y")} 00:00'
 
 log_formart = '%(asctime)s - %(message)s'
@@ -57,7 +59,7 @@ def login(usuario: str, senha: str) -> WebDriver:
 
 def resultado_popup(mensagem: str, browser: WebDriver) -> None:
     """Ler o conteúdo do popup, escreve o conteúdo em output.log e no console."""
-    mensagem_formatada = f'\n{mensagem} ({dia_da_carga_formatado})'
+    mensagem_formatada = f'{mensagem} ({dia_da_carga_formatado})'
 
     try:
         original_window = browser.current_window_handle
@@ -74,24 +76,18 @@ def resultado_popup(mensagem: str, browser: WebDriver) -> None:
                 if not result_text:
                     mensagem_formatada += ' Ok!'
                     logger.info(mensagem_formatada)
-                    # print(mensagem_formatada)
                 else:
                     mensagem_formatada += f': {result_text}'
                     logger.error(mensagem_formatada)
-                    # print(mensagem_formatada)
 
                 browser.close()
 
         browser.switch_to.window(original_window)
     except NoSuchElementException as err:
         mensagem_formatada += f': {err}'
-        # logger.error(mensagem_formatada)
-        # print(mensagem_formatada)
         raise NoSuchElementException(mensagem_formatada)
     except TimeoutException:
-        mensagem_formatada = f'Demorou mais de 1 hora pra fazer a {mensagem.lower()}.'
-        # logger.error(mensagem_formatada)
-        # print(mensagem_formatada)
+        mensagem_formatada = f'A execução foi abortada porque demorou mais de 1 hora pra fazer a {mensagem.lower()}.'
         raise TimeoutException(mensagem_formatada)
 
 
@@ -180,9 +176,9 @@ def enviar_email(mensagem: str) -> None:
 
     msg = email.message.Message()
     msg['Subject'] = f'Resultado da carga {dia_da_carga_formatado}'
-    msg['From'] = 'pedroaragao@virtual.ufc.br'
-    msg['To'] = 'pedroaragao@virtual.ufc.br'
-    password = senha_email
+    msg['From'] = os.environ.get('REMETENTE')
+    msg['To'] = os.environ.get('DESTINATARIOS')
+    password = os.environ.get('SENHA_EMAIL')
     msg.add_header('Content-Type', 'text/plain')
     msg.set_payload(corpo_email)
 
@@ -192,13 +188,14 @@ def enviar_email(mensagem: str) -> None:
     s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
 
 
-load_dotenv(find_dotenv())
+app = Rocketry()
 
-usuario = os.environ.get('USUARIO')
-senha = os.environ.get('SENHA')
-senha_email = os.environ.get('SENHA_EMAIL')
 
-if __name__ == '__main__':
+@app.task('daily')
+def fazer_carga():
+    usuario = os.environ.get('USUARIO')
+    senha = os.environ.get('SENHA')
+
     browser: WebDriver = login(usuario, senha)
 
     try:
@@ -208,10 +205,16 @@ if __name__ == '__main__':
         carga_matriculas_distancia(browser)
     except (NoSuchElementException, TimeoutException) as error:
         logger.error(error)
-        # print(error)
 
-    if senha_email:
+    try:
         resultado_log = ler_resultado_log('output.log')
         enviar_email(mensagem=resultado_log)
+    except SMTPException as error:
+        logger.error(error)
 
     browser.quit()
+
+
+if __name__ == '__main__':
+    load_dotenv(find_dotenv())
+    app.run()

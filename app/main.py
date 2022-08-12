@@ -74,11 +74,11 @@ def resultado_popup(mensagem: str, browser: WebDriver) -> None:
                 if not result_text:
                     mensagem_formatada += ' Ok!'
                     logger.info(mensagem_formatada)
-                    print(mensagem_formatada)
+                    # print(mensagem_formatada)
                 else:
                     mensagem_formatada += f': {result_text}'
                     logger.error(mensagem_formatada)
-                    print(mensagem_formatada)
+                    # print(mensagem_formatada)
 
                 browser.close()
 
@@ -176,16 +176,14 @@ def ler_resultado_log(arquivo_de_log: str) -> str:
 
 
 def enviar_email(mensagem: str) -> None:
-    corpo_email = f"""
-    <p>{mensagem}</p>
-    """
+    corpo_email = f"""{mensagem}"""
 
     msg = email.message.Message()
     msg['Subject'] = f'Resultado da carga {dia_da_carga_formatado}'
     msg['From'] = 'pedroaragao@virtual.ufc.br'
     msg['To'] = 'pedroaragao@virtual.ufc.br'
     password = senha_email
-    msg.add_header('Content-Type', 'text/html')
+    msg.add_header('Content-Type', 'text/plain')
     msg.set_payload(corpo_email)
 
     s = smtplib.SMTP('smtp.gmail.com: 587')

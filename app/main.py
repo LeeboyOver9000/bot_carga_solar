@@ -19,12 +19,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from smtplib import SMTPException
 
-from rocketry import Rocketry
-
 dir_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(dir_path)
 
-# dia_da_carga = datetime(day=27, month=5, year=2022)
 dia_da_carga = datetime.now() - timedelta(days=1)
 dia_da_carga_formatado = f'{datetime.strftime(dia_da_carga, "%d/%m/%Y")} 00:00'
 
@@ -188,10 +185,6 @@ def enviar_email(mensagem: str) -> None:
     s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
 
 
-app = Rocketry()
-
-
-@app.task('daily')
 def fazer_carga():
     usuario = os.environ.get('USUARIO')
     senha = os.environ.get('SENHA')
@@ -217,4 +210,4 @@ def fazer_carga():
 
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
-    app.run()
+    fazer_carga()

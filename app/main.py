@@ -2,6 +2,7 @@ import os
 import logging
 import smtplib
 import email.message
+import yagmail
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -169,27 +170,17 @@ def ler_resultado_log(arquivo_de_log: str) -> str:
 
 
 def enviar_email(mensagem: str) -> None:
-    sender_email = os.environ.get('REMETENTE')
-    receiver_email = os.environ.get('DESTINATARIOS')
+    sender = os.environ.get('REMETENTE')
+    receivers = os.environ.get('DESTINATARIOS')
     password = os.environ.get('SENHA_EMAIL')
+    body = f"""{mensagem}"""
 
-    corpo_email = f"""{mensagem}"""
-
-    msg = email.message.Message()
-    msg['From'] = sender_email
-    msg['To'] = receiver_email
-    msg['Subject'] = f'Resultado da carga {dia_da_carga_formatado}'
-    msg['Bcc'] = receiver_email
-    msg.add_header('Content-Type', 'text/plain')
-    msg.set_payload(corpo_email)
-
-    server = smtplib.SMTP('smtp.gmail.com: 587')
-    server.starttls()
-    server.login(msg['From'], password)
-    server.sendmail(
-        sender_email, receiver_email, msg.as_string().encode('utf-8')
+    yag = yagmail.SMTP(sender, password)
+    yag.send(
+        to=receivers.split(','),
+        subject=f'Resultado da carga {dia_da_carga_formatado}',
+        contents=body,
     )
-    server.quit()
 
 
 def fazer_carga():

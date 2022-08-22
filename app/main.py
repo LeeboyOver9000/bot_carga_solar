@@ -1,7 +1,5 @@
 import os
 import logging
-import smtplib
-import email.message
 import yagmail
 
 from dotenv import load_dotenv, find_dotenv

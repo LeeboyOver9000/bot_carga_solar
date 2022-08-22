@@ -16,7 +16,6 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
 
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from smtplib import SMTPException
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(dir_path)
@@ -195,15 +194,11 @@ def fazer_carga():
     except (NoSuchElementException, TimeoutException) as error:
         logger.error(error)
 
-    try:
-        resultado_log = ler_resultado_log('output.log')
-        enviar_email(mensagem=resultado_log)
-    except SMTPException as error:
-        logger.error(error)
-
     browser.quit()
 
 
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
     fazer_carga()
+    resultado_log = ler_resultado_log('output.log')
+    enviar_email(mensagem=resultado_log)

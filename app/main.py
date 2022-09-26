@@ -184,7 +184,13 @@ def fazer_carga():
     usuario = os.environ.get('USUARIO')
     senha = os.environ.get('SENHA')
 
-    browser: WebDriver = login(usuario, senha)
+    browser: WebDriver = None
+
+    while not browser:
+        try:
+            browser = login(usuario, senha)
+        except Exception:
+            browser = None
 
     try:
         carga_disciplinas(browser)

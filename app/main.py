@@ -38,6 +38,9 @@ def login(usuario: str, senha: str) -> WebDriver:
         f'http://{usuario}:{senha}@200.129.43.116/Solar2SI3/Batch/Batches.aspx'
     )
 
+    os.environ['WDM_LOG'] = str(logging.NOTSET)
+    os.environ['WDM_LOCAL'] = '1'
+
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
